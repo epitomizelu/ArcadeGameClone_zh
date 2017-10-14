@@ -5,7 +5,7 @@ var Entity = function() {
     this.y = 0;
 
     // 角色身材
-    this.width =0;
+    this.width =101;
     this.height =0;
 
     // 敌人的图片或者雪碧图，用一个我们提供的工具函数来轻松的加载文件
@@ -17,6 +17,7 @@ Entity.prototype.render = function() {
     var image = Resources.get(this.sprite);
     ctx.drawImage(image, this.x, this.y);
     this.setFigure(image.width,image.height);
+
 };
 
 // 设置角色的身材
@@ -45,7 +46,7 @@ var Enemy = function() {
  * @param {number} 需要创建敌人的数量
  * @return {[Enemy]} 根据指定的数量创建的由敌人构成的对象数组
  */
-Enemy.createEnemies(num) {
+Enemy.createEnemies = function(num) {
      var allEnemies = [];
 
      for(var i=0;i<num;i++){
@@ -80,6 +81,7 @@ Enemy.prototype.initY = function() {
 Enemy.prototype.initX = function() {
     var row = this.y/this.rowHeight,
         randomOffset = Math.ceil(Math.random() * 3);
+        
     this.x =  this.minXInEachRow[row] - randomOffset * this.width;
     this.minXInEachRow[row] = this.x;
 }
@@ -89,13 +91,18 @@ Enemy.prototype.resetX = function() {
      this.x = -3 * this.width;
 }
 
+// 当地人移出画布外后，重置敌人的 x 坐标 , 使其回到画布左侧，进行下一轮的移动
+Enemy.prototype.udateX = function(dt) {
+     this.x = this.x + this.speed*dt;;
+}
+
 // 此为游戏必须的函数，用来更新敌人的位置
 // 参数: dt ，表示时间间隙
 Enemy.prototype.update = function(dt) {
     // 你应该给每一次的移动都乘以 dt 参数，以此来保证游戏在所有的电脑上
     // 都是以同样的速度运行的
     // 敌人移动到画布外后，将其移回画布左侧，x、y坐标同时更改
-    this.x > ctx.canvas.width ? this.resetX() : this.x + this.speed*dt;
+    this.x > ctx.canvas.width ? this.resetX() : this.udateX(dt);
     this.x > ctx.canvas.width ? this.initY()  : this.y;
 };
 

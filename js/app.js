@@ -26,7 +26,7 @@ Entity.prototype.setFigure = function(width , height) {
 }
 
 // 角色的状态初始化函数，主要是设置角色的图片
-Entity.prototype.init = function(url){
+Entity.prototype.setSprite = function(url){
     this.sprite = url;
 }
 
@@ -37,7 +37,7 @@ var Enemy = function() {
     this.speed = 0;
     this.rowHeight =75;
     
-    this.init('images/enemy-bug.png');
+    this.init();
 };
 
 /**
@@ -58,23 +58,25 @@ Enemy.createEnemies(num) {
 // 为敌人指定原型对象，使敌人和玩家继承自同一个父类
 Enemy.prototype = new Entity();
 
-// 记录每一行的敌人数量
+// 记录每一行的最小X 坐标
 Enemy.prototype.minXInEachRow = {1:0,2:0,3:0}
 
 // 初始化敌人的状态
 Enemy.prototype.init = function() {
-    this.setY();
+    this.setSprite('images/enemy-bug.png');
+    this.initY();
     this.initX();
     this.speed = this.getSpeed();
 }
 
-// 设置敌人出现的初始 y 坐标
-Enemy.prototype.setY = function() {
+// 设置敌人出现的初始 y 坐标 , 随机出现在敌人可以出现的三条道路
+Enemy.prototype.initY = function() {
      var row = Math.ceil(Math.random() * 3);
      this.y = row * this.rowHeight;
 }
 
-// 获取敌人出现的初始 x 坐标 ,同一行的敌人不要重叠，控制先后出现在同一行的两个相邻敌人的间距不超过三个身位
+// 获取敌人出现的初始 x 坐标 ,游戏开始时同一行的敌人不要重叠，而是要先后出现
+// 同时，控制先后出现在同一行的两个相邻敌人的间距不超过三个身位
 Enemy.prototype.initX = function() {
     var row = this.y/this.rowHeight,
         randomOffset = Math.ceil(Math.random() * 3);
@@ -82,13 +84,19 @@ Enemy.prototype.initX = function() {
     this.minXInEachRow[row] = this.x;
 }
 
+// 当地人移出画布外后，重置敌人的 x 坐标 , 使其回到画布左侧，进行下一轮的移动
+Enemy.prototype.resetX = function() {
+     this.x = -3 * this.width;
+}
+
 // 此为游戏必须的函数，用来更新敌人的位置
 // 参数: dt ，表示时间间隙
 Enemy.prototype.update = function(dt) {
     // 你应该给每一次的移动都乘以 dt 参数，以此来保证游戏在所有的电脑上
     // 都是以同样的速度运行的
-    this.x = this.x > ctx.canvas.width ? -3 * this.width : this.x + this.speed*dt;
-    this.x > ctx.canvas.width ? this.setY() : this.y;
+    // 敌人移动到画布外后，将其移回画布左侧，x、y坐标同时更改
+    this.x > ctx.canvas.width ? this.resetX() : this.x + this.speed*dt;
+    this.x > ctx.canvas.width ? this.initY()  : this.y;
 };
 
 /**
@@ -112,7 +120,7 @@ var Player = function() {
     this.row = 5;
     this.col = 2;
 
-    this.init('images/char-boy.png');
+    this.setSprite('images/char-boy.png');
 }
 
 // 为玩家指定原型对象，使敌人和玩家继承自同一个父类

@@ -177,7 +177,7 @@ var allEnemies = [],
     createEnemies(9);
 
 // 根据指定数量创建敌人
-function createEnemies(num){
+function createEnemies(num) {
      for(var i=0;i<num;i++){
         allEnemies.push(new Enemy());
      }

@@ -25,7 +25,7 @@ Entity.prototype.setFigure = function(width , height) {
     this.height = height;
 }
 
-// 角色的状态初始化函数，主要是设置敌人的图片
+// 角色的状态初始化函数，主要是设置角色的图片
 Entity.prototype.init = function(url){
     this.sprite = url;
 }

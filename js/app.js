@@ -1,10 +1,10 @@
 // 游戏角色的父类 
 var Entity = function() {
-    //角色在地图上的x，y坐标
+    // 角色在地图上的x，y坐标
     this.x = 0;
     this.y = 0;
 
-    //角色身材
+    // 角色身材
     this.width =0;
     this.height =0;
 
@@ -55,7 +55,7 @@ Enemy.createEnemies(num) {
      return allEnemies;
 }
 
-//为敌人指定原型对象，使敌人和玩家继承自同一个父类
+// 为敌人指定原型对象，使敌人和玩家继承自同一个父类
 Enemy.prototype = new Entity();
 
 // 记录每一行的敌人数量
@@ -68,13 +68,13 @@ Enemy.prototype.init = function() {
     this.speed = this.getSpeed();
 }
 
-//设置敌人出现的初始 y 坐标
+// 设置敌人出现的初始 y 坐标
 Enemy.prototype.setY = function() {
      var row = Math.ceil(Math.random() * 3);
      this.y = row * this.rowHeight;
 }
 
-//获取敌人出现的初始 x 坐标 ,同一行的敌人不要重叠，控制先后出现在同一行的两个相邻敌人的间距不超过三个身位
+// 获取敌人出现的初始 x 坐标 ,同一行的敌人不要重叠，控制先后出现在同一行的两个相邻敌人的间距不超过三个身位
 Enemy.prototype.initX = function() {
     var row = this.y/this.rowHeight,
         randomOffset = Math.ceil(Math.random() * 3);
@@ -115,10 +115,10 @@ var Player = function() {
     this.init('images/char-boy.png');
 }
 
-//为玩家指定原型对象，使敌人和玩家继承自同一个父类
+// 为玩家指定原型对象，使敌人和玩家继承自同一个父类
 Player.prototype = new Entity();
 
-//重置玩家的位置
+// 重置玩家的位置
 Player.prototype.reset = function() {
     this.col = 2 ;
     this.row = 5 ;
@@ -133,7 +133,7 @@ Player.prototype.update = function(dt) {
     this.x = this.col * this.hStep;
     this.y = this.row * this.vStep;
 
-    //玩家移动之后，要检测是否发生了碰撞，如果发生了碰撞，玩家要回到游戏开始时的位置
+    // 玩家移动之后，要检测是否发生了碰撞，如果发生了碰撞，玩家要回到游戏开始时的位置
     if(this.detectCrash()){
        this.reset();
     }

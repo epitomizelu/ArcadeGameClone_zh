@@ -19,11 +19,22 @@ var Engine = (function(global) {
         win = global.window,
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
+        canvas2 = doc.createElement('canvas'),
+        ctx2 = canvas2.getContext('2d'),
         lastTime;
 
     canvas.width = 505;
     canvas.height = 606;
+
+    canvas2.width = 505;
+    canvas2.height = 606;
+
     doc.body.appendChild(canvas);
+    doc.body.appendChild(canvas2);
+
+    canvas2.onclick = function() {
+        player.reset();
+    }
 
     /* 这个函数是整个游戏的主入口，负责适当的调用 update / render 函数 */
     function main() {
@@ -148,4 +159,5 @@ var Engine = (function(global) {
      * 对象。从而开发者就可以在他们的app.js文件里面更容易的使用它。
      */
     global.ctx = ctx;
+    global.ctx2 = ctx2;
 })(this);

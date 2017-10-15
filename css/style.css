@@ -1,3 +1,9 @@
 body {
     text-align: center;
+    position:  relative;
+}
+
+canvas{
+	position: absolute;
+	
 }

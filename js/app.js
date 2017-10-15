@@ -5,8 +5,8 @@ var Entity = function() {
     this.y = 0;
 
     // 角色身材
-    this.width =101;
-    this.height =0;
+    this.width = 101;
+    this.height = 0;
 
     // 敌人的图片或者雪碧图，用一个我们提供的工具函数来轻松的加载文件
     this.sprite = 'images/enemy-bug.png';
@@ -16,18 +16,18 @@ var Entity = function() {
 Entity.prototype.render = function() {
     var image = Resources.get(this.sprite);
     ctx.drawImage(image, this.x, this.y);
-    this.setFigure(image.width,image.height);
+    this.setFigure(image.width, image.height);
 
 };
 
 // 设置角色的身材
-Entity.prototype.setFigure = function(width , height) {
+Entity.prototype.setFigure = function(width, height) {
     this.width = width;
     this.height = height;
 }
 
 // 角色的状态初始化函数，主要是设置角色的图片
-Entity.prototype.setSprite = function(url){
+Entity.prototype.setSprite = function(url) {
     this.sprite = url;
 }
 
@@ -37,8 +37,8 @@ var Enemy = function() {
     // 我们已经提供了一个来帮助你实现更多
     this.speed = 0;
     // 游戏地图每一行的行高，用来计算敌人的坐标
-    this.rowHeight =75;
-    
+    this.rowHeight = 75;
+
     this.init();
 };
 
@@ -48,20 +48,20 @@ var Enemy = function() {
  * @return {[Enemy]} 根据指定的数量创建的由敌人构成的对象数组
  */
 Enemy.createEnemies = function(num) {
-     var allEnemies = [];
+    var allEnemies = [];
 
-     for(var i=0;i<num;i++){
+    for (var i = 0; i < num; i++) {
         allEnemies.push(new Enemy());
-     }
+    }
 
-     return allEnemies;
+    return allEnemies;
 }
 
 // 为敌人指定原型对象，使敌人和玩家继承自同一个父类
 Enemy.prototype = new Entity();
 
 // 记录每一行的最小X 坐标
-Enemy.prototype.minXInEachRow = {1:0,2:0,3:0}
+Enemy.prototype.minXInEachRow = { 1: 0, 2: 0, 3: 0 }
 
 // 初始化敌人的状态
 Enemy.prototype.init = function() {
@@ -73,28 +73,28 @@ Enemy.prototype.init = function() {
 
 // 设置敌人出现的初始 y 坐标 , 随机出现在敌人可以出现的三条道路
 Enemy.prototype.initY = function() {
-     var row = Math.ceil(Math.random() * 3);
-     this.y = row * this.rowHeight;
+    var row = Math.ceil(Math.random() * 3);
+    this.y = row * this.rowHeight;
 }
 
 // 获取敌人出现的初始 x 坐标 ,游戏开始时同一行的敌人不要重叠，而是要先后出现
 // 同时，控制先后出现在同一行的两个相邻敌人的间距不超过三个身位
 Enemy.prototype.initX = function() {
-    var row = this.y/this.rowHeight,
+    var row = this.y / this.rowHeight,
         randomOffset = Math.ceil(Math.random() * 3);
 
-    this.x =  this.minXInEachRow[row] - randomOffset * this.width;
+    this.x = this.minXInEachRow[row] - randomOffset * this.width;
     this.minXInEachRow[row] = this.x;
 }
 
 // 当敌人移出画布外后，重置敌人的 x 坐标 , 使其回到画布左侧，进行下一轮的移动
 Enemy.prototype.resetX = function() {
-     this.x = -3 * this.width;
+    this.x = -3 * this.width;
 }
 
 // 更新敌人的 x 坐标
 Enemy.prototype.updateX = function(dt) {
-     this.x = this.x + this.speed*dt;;
+    this.x = this.x + this.speed * dt;;
 }
 
 // 此为游戏必须的函数，用来更新敌人的位置
@@ -104,29 +104,32 @@ Enemy.prototype.update = function(dt) {
     // 都是以同样的速度运行的
     // 敌人移动到画布外后，将其移回画布左侧，x、y坐标同时更改
     this.x > ctx.canvas.width ? this.resetX() : this.updateX(dt);
-    this.x > ctx.canvas.width ? this.initY()  : this.y;
+    this.x > ctx.canvas.width ? this.initY() : this.y;
 };
 
 /**
  *为敌人赋速度
  *@return (number) 速度值为[30,80]之间
- */ 
+ */
 Enemy.prototype.getSpeed = function() {
-    return Math.ceil(Math.random()*50)+30;
+    return Math.ceil(Math.random() * 50) + 30;
 }
 
 // 现在实现你自己的玩家类
 // 这个类需要一个 update() 函数， render() 函数和一个 handleInput()函数
 var Player = function() {
     //纵向步长
-    this.vStep  = this.options.VERTICAL_STEP_LENGTH;
+    this.vStep = this.options.VERTICAL_STEP_LENGTH;
 
     // 横向步长
-    this.hStep = this.options.HORIZONTAL_STEP_LENGTH; 
+    this.hStep = this.options.HORIZONTAL_STEP_LENGTH;
 
     // 在地图中的行列号
     this.row = this.options.START_ROW;
     this.col = this.options.START_COL;
+
+    // 游戏是否胜利
+    this.win = false;
 
     this.setSprite('images/char-boy.png');
 }
@@ -136,17 +139,19 @@ Player.prototype = new Entity();
 
 //玩家的各种默认参数值
 Player.prototype.options = {
-    START_ROW : 5,
-    START_COL :2,
-    VERTICAL_STEP_LENGTH : 75,
-    HORIZONTAL_STEP_LENGTH : 101,
+    START_ROW: 5,
+    START_COL: 2,
+    VERTICAL_STEP_LENGTH: 75,
+    HORIZONTAL_STEP_LENGTH: 101,
 
 }
 
-// 重置玩家的位置
+// 重置玩家的位置 和 游戏输赢状态
 Player.prototype.reset = function() {
     this.row = this.options.START_ROW;
     this.col = this.options.START_COL;
+
+    this.win = false;
 }
 
 /**
@@ -159,8 +164,12 @@ Player.prototype.update = function(dt) {
     this.y = this.row * this.vStep;
 
     // 玩家移动之后，要检测是否发生了碰撞，如果发生了碰撞，玩家要回到游戏开始时的位置
-    if(this.detectCrash()){
-       this.reset();
+    if (this.detectCrash()) {
+        this.reset();
+    }
+
+    if (this.row == 0 && !this.win) {
+        this.youWin();
     }
 
 }
@@ -174,17 +183,17 @@ Player.prototype.detectCrash = function() {
 
     return allEnemies.some(function(item, index) {
         // 1,先决条件：玩家和敌人是否在同一行，位于同一行才可能碰撞
-        if(parseInt(item.y/item.rowHeight) != parseInt(that.y/that.vStep)){
+        if (parseInt(item.y / item.rowHeight) != parseInt(that.y / that.vStep)) {
             return;
         }
 
         // 2，玩家位于敌人右边
-        if(item.x < that.x && that.x - item.x < item.width/2){
+        if (item.x < that.x && that.x - item.x < item.width / 2) {
             return true;
         }
 
         // 3，玩家位于敌人左边
-        if(item.x > that.x && item.x - that.x < that.width/2){
+        if (item.x > that.x && item.x - that.x < that.width / 2) {
             return true;
         }
 
@@ -194,36 +203,63 @@ Player.prototype.detectCrash = function() {
 
 // 监听用户的操作（向上、下、左、右四个方向移动玩家），并完成响应的动作
 Player.prototype.handleInput = function(direction) {
-    if(!direction)return;
+    if (!direction) return;
 
     // 左移且在移动范围内
-    if(direction == 'right' && this.col <4){
-         this.col += 1;
+    if (direction == 'right' && this.col < 4) {
+        this.col += 1;
     }
 
     // 右移且在移动范围内
-    if(direction == 'left' && this.col >0 ){
-         this.col -= 1;
+    if (direction == 'left' && this.col > 0) {
+        this.col -= 1;
     }
 
     // 下移且在画布范围内
-    if(direction == 'down' && this.row <5){
-         this.row += 1;
+    if (direction == 'down' && this.row < 5) {
+        this.row += 1;
     }
 
     // 上移且在画布范围内
-    if(direction == 'up' && this.row >0){
-         this.row -= 1;
+    if (direction == 'up' && this.row > 0) {
+        this.row -= 1;
     }
 
 }
+
+// 游戏胜利提示
+Player.prototype.youWin = function(dt) {
+    this.win = true;
+
+    ctx2.font = '40px verdana';
+    ctx2.shadowBlur = 10;
+    ctx2.shadowColor = "white";
+    ctx2.fillStyle = "rgba(255, 255, 255, " + this.alpha + ")";
+    ctx2.fillText("YOU WIN", 200, 300);
+    ctx2.save();
+
+    ctx2.font = '25px verdana';
+    ctx2.fillText("CLICK TO CONTINUE", 180, 325);
+    ctx2.restore();
+
+}
+
+// 重新开始游戏
+Player.prototype.restart = function() {
+    ctx2.clearRect(0,0,505,606);
+    this.reset();
+}
+
+
+
+
 
 // 现在实例化你的所有对象
 // 把所有敌人的对象都放进一个叫 allEnemies 的数组里面
 // 把玩家对象放进一个叫 player 的变量里面
 var allEnemies = Enemy.createEnemies(9),
     player = new Player();
-    
+
 // 这段代码监听游戏玩家的键盘点击事件并且代表将按键的关键数字送到 Play.handleInput()
 // 方法里面。你不需要再更改这段代码了。
 document.addEventListener('keyup', function(e) {

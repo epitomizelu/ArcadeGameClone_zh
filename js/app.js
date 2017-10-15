@@ -1,4 +1,4 @@
-// 游戏角色的父类 
+// 游戏角色(敌人、玩家)的父类 
 var Entity = function() {
     // 角色在地图上的x，y坐标
     this.x = 0;
@@ -36,6 +36,7 @@ var Enemy = function() {
     // 要应用到每个敌人的实例的变量写在这里
     // 我们已经提供了一个来帮助你实现更多
     this.speed = 0;
+    // 游戏地图每一行的行高，用来计算敌人的坐标
     this.rowHeight =75;
     
     this.init();
@@ -81,18 +82,18 @@ Enemy.prototype.initY = function() {
 Enemy.prototype.initX = function() {
     var row = this.y/this.rowHeight,
         randomOffset = Math.ceil(Math.random() * 3);
-        
+
     this.x =  this.minXInEachRow[row] - randomOffset * this.width;
     this.minXInEachRow[row] = this.x;
 }
 
-// 当地人移出画布外后，重置敌人的 x 坐标 , 使其回到画布左侧，进行下一轮的移动
+// 当敌人移出画布外后，重置敌人的 x 坐标 , 使其回到画布左侧，进行下一轮的移动
 Enemy.prototype.resetX = function() {
      this.x = -3 * this.width;
 }
 
-// 当地人移出画布外后，重置敌人的 x 坐标 , 使其回到画布左侧，进行下一轮的移动
-Enemy.prototype.udateX = function(dt) {
+// 更新敌人的 x 坐标
+Enemy.prototype.updateX = function(dt) {
      this.x = this.x + this.speed*dt;;
 }
 
@@ -102,13 +103,13 @@ Enemy.prototype.update = function(dt) {
     // 你应该给每一次的移动都乘以 dt 参数，以此来保证游戏在所有的电脑上
     // 都是以同样的速度运行的
     // 敌人移动到画布外后，将其移回画布左侧，x、y坐标同时更改
-    this.x > ctx.canvas.width ? this.resetX() : this.udateX(dt);
+    this.x > ctx.canvas.width ? this.resetX() : this.updateX(dt);
     this.x > ctx.canvas.width ? this.initY()  : this.y;
 };
 
 /**
  *为敌人赋速度
- *@return (number) 速度值为[10,20]之间
+ *@return (number) 速度值为[30,80]之间
  */ 
 Enemy.prototype.getSpeed = function() {
     return Math.ceil(Math.random()*50)+30;
@@ -117,15 +118,15 @@ Enemy.prototype.getSpeed = function() {
 // 现在实现你自己的玩家类
 // 这个类需要一个 update() 函数， render() 函数和一个 handleInput()函数
 var Player = function() {
-    // 纵向步长
-    this.vStep  = 75;
+    //纵向步长
+    this.vStep  = this.options.VERTICAL_STEP_LENGTH;
 
     // 横向步长
-    this.hStep = 101;
- 
+    this.hStep = this.options.HORIZONTAL_STEP_LENGTH; 
+
     // 在地图中的行列号
-    this.row = 5;
-    this.col = 2;
+    this.row = this.options.START_ROW;
+    this.col = this.options.START_COL;
 
     this.setSprite('images/char-boy.png');
 }
@@ -133,10 +134,19 @@ var Player = function() {
 // 为玩家指定原型对象，使敌人和玩家继承自同一个父类
 Player.prototype = new Entity();
 
+//玩家的各种默认参数值
+Player.prototype.options = {
+    START_ROW : 5,
+    START_COL :2,
+    VERTICAL_STEP_LENGTH : 75,
+    HORIZONTAL_STEP_LENGTH : 101,
+
+}
+
 // 重置玩家的位置
 Player.prototype.reset = function() {
-    this.col = 2 ;
-    this.row = 5 ;
+    this.row = this.options.START_ROW;
+    this.col = this.options.START_COL;
 }
 
 /**
@@ -152,6 +162,7 @@ Player.prototype.update = function(dt) {
     if(this.detectCrash()){
        this.reset();
     }
+
 }
 
 /*

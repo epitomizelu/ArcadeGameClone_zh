@@ -131,11 +131,21 @@ var Player = function() {
     // 游戏是否胜利
     this.win = false;
 
-    this.setSprite('images/char-boy.png');
+    this.init();
 }
 
 // 为玩家指定原型对象，使敌人和玩家继承自同一个父类
 Player.prototype = new Entity();
+
+Player.prototype.init = function() {
+    this.setSprite('images/char-boy.png');
+
+    //游戏胜利时的提示背景只需要初始化一次
+    if(!this.options.shadow){
+        this.createShadow();
+    }
+    
+}
 
 //玩家的各种默认参数值
 Player.prototype.options = {
@@ -144,7 +154,8 @@ Player.prototype.options = {
     VERTICAL_STEP_LENGTH: 75,
     HORIZONTAL_STEP_LENGTH: 101,
     MAP_WIDTH: 505,
-    MAP_HEIGHT: 606
+    MAP_HEIGHT: 606,
+    shadow: undefined
 
 }
 
@@ -207,6 +218,9 @@ Player.prototype.detectCrash = function() {
 Player.prototype.handleInput = function(direction) {
     if (!direction) return;
 
+    // 游戏胜利后，显示遮罩层，此时不允许用户继续游戏
+    if (this.win) return;
+
     // 左移且在移动范围内
     if (direction == 'right' && this.col < 4) {
         this.col += 1;
@@ -230,32 +244,40 @@ Player.prototype.handleInput = function(direction) {
 }
 
 // 游戏胜利提示
-Player.prototype.youWin = function(dt) {
+Player.prototype.youWin = function() {
     this.win = true;
-
-    ctx2.font = '40px verdana';
-    ctx2.shadowBlur = 10;
-    ctx2.shadowColor = "white";
-    ctx2.fillStyle = "rgba(255, 255, 255, " + this.alpha + ")";
-    ctx2.fillText("YOU WIN", 200, 300);
-    ctx2.save();
-
-    ctx2.font = '25px verdana';
-    ctx2.fillText("CLICK TO CONTINUE", 180, 325);
-    ctx2.restore();
-
+    this.options.shadow.style.display = "block";
 }
 
 // 重新开始游戏
 Player.prototype.restart = function() {
-    document.body.removeChild(ctx2.canvas);
-    document.body.appendChild(ctx2.canvas);
+    if(!this.win)return;
+
+    this.win = false;
+       
     this.reset();
 }
 
+//创建游戏胜利时的遮罩层
+Player.prototype.createShadow = function() {
+    var that = this;
 
+    var shadow = document.createElement("div"),
+        text = document.createTextNode("YOU WIN! CLICK HERE TO CONTINUE");
 
+    shadow.appendChild(text);
+    shadow.classList.add("shadow");
+    shadow.onclick = function() {
+        this.style.display = "none";
 
+        that.reset();
+    }
+
+    document.body.appendChild(shadow);
+
+    this.options.shadow = shadow;
+
+}
 
 // 现在实例化你的所有对象
 // 把所有敌人的对象都放进一个叫 allEnemies 的数组里面

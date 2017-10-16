@@ -143,6 +143,8 @@ Player.prototype.options = {
     START_COL: 2,
     VERTICAL_STEP_LENGTH: 75,
     HORIZONTAL_STEP_LENGTH: 101,
+    MAP_WIDTH: 505,
+    MAP_HEIGHT: 606
 
 }
 
@@ -246,7 +248,8 @@ Player.prototype.youWin = function(dt) {
 
 // 重新开始游戏
 Player.prototype.restart = function() {
-    ctx2.clearRect(0,0,505,606);
+    document.body.removeChild(ctx2.canvas);
+    document.body.appendChild(ctx2.canvas);
     this.reset();
 }
 
